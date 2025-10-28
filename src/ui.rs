@@ -50,8 +50,8 @@ pub fn render_ui(ctx: &egui::Context, state: &Arc<Mutex<AppState>>) {
             st.last_input = Instant::now();
             let file_mode = st.query.starts_with("f ");
             st.refresh_results(file_mode);
-            if st.selected >= st.results.len() { 
-                st.selected = st.results.len().saturating_sub(1); 
+            if st.selected >= st.results.len() {
+                st.selected = st.results.len().saturating_sub(1);
             }
             if file_mode {
                 st.last_fd_query = st.query.clone();
@@ -79,13 +79,13 @@ fn render_search_input(ui: &mut egui::Ui, st: &mut AppState) -> Option<egui::Res
 
         // Place the text edit inside with padding
         let mut child = ui.child_ui(rect.shrink2(egui::vec2(10.0, 6.0)), *ui.layout());
-        
+
         let hint_text = if st.autocomplete_mode {
             "Autocomplete Mode - Tab to toggle | Type to get word suggestions"
         } else {
             "Apps | f <name> | ?q / g q | Tab for autocomplete"
         };
-        
+
         let r = child.add_sized(
             [520.0, 32.0],
             egui::TextEdit::singleline(&mut st.query)
@@ -105,8 +105,8 @@ fn render_search_input(ui: &mut egui::Ui, st: &mut AppState) -> Option<egui::Res
 
     // Focus on first open
     if !st.focused_once {
-        if let Some(r) = &resp { 
-            r.request_focus(); 
+        if let Some(r) = &resp {
+            r.request_focus();
         }
         ui.ctx().send_viewport_cmd(egui::ViewportCommand::Focus);
         st.focused_once = true;
@@ -120,26 +120,26 @@ fn handle_keyboard_input(ui: &egui::Ui, ctx: &egui::Context, st: &mut AppState) 
     let up = ui.input(|i| i.key_pressed(egui::Key::ArrowUp));
     let down = ui.input(|i| i.key_pressed(egui::Key::ArrowDown));
     let tab = ui.input(|i| i.key_pressed(egui::Key::Tab));
-    
+
     // Toggle autocomplete mode with Tab key
     if tab {
         st.toggle_autocomplete_mode();
         // Refresh results with new mode
         let file_mode = st.query.starts_with("f ");
         st.refresh_results(file_mode);
-        if st.selected >= st.results.len() { 
-            st.selected = st.results.len().saturating_sub(1); 
+        if st.selected >= st.results.len() {
+            st.selected = st.results.len().saturating_sub(1);
         }
         return; // Don't process other keys when toggling
     }
-    
-    if up && st.selected > 0 { 
-        st.selected -= 1; 
+
+    if up && st.selected > 0 {
+        st.selected -= 1;
     }
-    if down && st.selected + 1 < st.results.len() { 
-        st.selected += 1; 
+    if down && st.selected + 1 < st.results.len() {
+        st.selected += 1;
     }
-    
+
     if enter {
         if let Some(action) = st.results.get(st.selected).map(|e| e.action.clone()) {
             match action {
@@ -165,17 +165,17 @@ fn handle_keyboard_input(ui: &egui::Ui, ctx: &egui::Context, st: &mut AppState) 
 
 fn render_results(ui: &mut egui::Ui, st: &mut AppState) {
     let mut clicked_idx: Option<usize> = None;
-    
+
     egui::ScrollArea::vertical().show(ui, |ui| {
         ui.vertical_centered(|ui| {
             let desired_width = 600.0;
             let items: Vec<(usize, crate::actions::Entry)> = st.results.iter().cloned().enumerate().collect();
             let mut selected_row_rect: Option<egui::Rect> = None;
-            
+
             for (idx, e) in items.into_iter() {
                 let is_selected = idx == st.selected;
                 let row_selected_bg = st.theme.selection_bg;
-                
+
                 let inner = egui::Frame::none()
                     .fill(if is_selected { row_selected_bg } else { egui::Color32::TRANSPARENT })
                     .inner_margin(egui::Margin::symmetric(ROW_INNER_XPAD, ROW_INNER_YPAD))
@@ -185,7 +185,7 @@ fn render_results(ui: &mut egui::Ui, st: &mut AppState) {
                         ui.horizontal(|ui| {
                             // Render icon for app entries
                             render_icon(ui, st, &e);
-                            
+
                             // Render text content
                             ui.vertical(|ui| {
                                 let title = if is_selected {
@@ -210,20 +210,20 @@ fn render_results(ui: &mut egui::Ui, st: &mut AppState) {
                             });
                         });
                     });
-                
-                if is_selected { 
-                    selected_row_rect = Some(inner.response.rect); 
+
+                if is_selected {
+                    selected_row_rect = Some(inner.response.rect);
                 }
                 if inner.response.clicked() {
                     clicked_idx = Some(idx);
                 }
                 ui.add_space(6.0);
             }
-            
+
             // Handle scrolling to selected item
             if ui.input(|i| i.key_pressed(egui::Key::ArrowUp) || i.key_pressed(egui::Key::ArrowDown)) {
-                if let Some(rect) = selected_row_rect { 
-                    ui.scroll_to_rect(rect, Some(egui::Align::Center)); 
+                if let Some(rect) = selected_row_rect {
+                    ui.scroll_to_rect(rect, Some(egui::Align::Center));
                 }
             }
         });
@@ -259,14 +259,14 @@ fn render_icon(ui: &mut egui::Ui, st: &mut AppState, entry: &crate::actions::Ent
                     (Some(p), _) => Some(p.clone()),
                     (None, icon_field) => apps::resolve_icon_path(icon_field),
                 };
-                
+
                 if let Some(icon_path) = icon_path_owned.as_ref() {
                     let key = format!("{}@{}", icon_path.to_string_lossy(), ICON_SIZE_PX as i32);
-                    
+
                     if !st.icon_textures.contains_key(&key) {
                         load_icon_texture(ui, st, icon_path, &key);
                     }
-                    
+
                     if let Some(tex) = st.icon_textures.get(&key) {
                         let sz = egui::vec2(ICON_SIZE_PX, ICON_SIZE_PX);
                         ui.add(egui::Image::new(tex).fit_to_exact_size(sz));
@@ -275,15 +275,19 @@ fn render_icon(ui: &mut egui::Ui, st: &mut AppState, entry: &crate::actions::Ent
                 }
             }
         }
-        Action::SpotifyCommand(_) => {
-            let spotify_icon_path = std::path::Path::new("assets/icons/spotify.png");
-            let key = format!("spotify@{}", ICON_SIZE_PX as i32);
-            
-            if !st.icon_textures.contains_key(&key) {
-                load_icon_texture(ui, st, spotify_icon_path, &key);
+        Action::SpotifyCommand(cmd) => {
+            // Determine if this is a kew or spotify/playerctl command
+            let (icon_path, icon_key) = if cmd.starts_with("kew ") {
+                (std::path::Path::new("assets/icons/kew.png"), format!("kew@{}", ICON_SIZE_PX as i32))
+            } else {
+                (std::path::Path::new("assets/icons/spotify.png"), format!("spotify@{}", ICON_SIZE_PX as i32))
+            };
+
+            if !st.icon_textures.contains_key(&icon_key) {
+                load_icon_texture(ui, st, icon_path, &icon_key);
             }
-            
-            if let Some(tex) = st.icon_textures.get(&key) {
+
+            if let Some(tex) = st.icon_textures.get(&icon_key) {
                 let sz = egui::vec2(ICON_SIZE_PX, ICON_SIZE_PX);
                 ui.add(egui::Image::new(tex).fit_to_exact_size(sz));
                 ui.add_space(10.0);
@@ -298,7 +302,7 @@ fn render_icon(ui: &mut egui::Ui, st: &mut AppState, entry: &crate::actions::Ent
 fn load_icon_texture(ui: &egui::Ui, st: &mut AppState, icon_path: &std::path::Path, key: &str) {
     let ext = icon_path.extension().and_then(|s| s.to_str()).unwrap_or("").to_ascii_lowercase();
     let mut decoded: Option<image::DynamicImage> = None;
-    
+
     // Handle SVG files
     if ext == "svg" || ext == "svgz" {
         let mut cmd = std::process::Command::new("rsvg-convert");
@@ -317,7 +321,7 @@ fn load_icon_texture(ui: &egui::Ui, st: &mut AppState, icon_path: &std::path::Pa
             }
         }
     }
-    
+
     // Handle other image formats
     if decoded.is_none() {
         if let Ok(img) = std::fs::read(&icon_path) {
@@ -326,7 +330,7 @@ fn load_icon_texture(ui: &egui::Ui, st: &mut AppState, icon_path: &std::path::Pa
             }
         }
     }
-    
+
     // Create texture from decoded image
     if let Some(dynimg) = decoded {
         let rgba = dynimg.into_rgba8();

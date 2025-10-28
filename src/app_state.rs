@@ -99,7 +99,7 @@ impl AppState {
             ];
 
             let spotify_query = if q.len() > 2 { q[2..].trim() } else { "" };
-            
+
             for (command, description, playerctl_cmd) in spotify_commands {
                 if spotify_query.is_empty() || command.contains(spotify_query) {
                     self.results.push(Entry {
@@ -109,7 +109,52 @@ impl AppState {
                     });
                 }
             }
-            
+
+            if !self.results.is_empty() {
+                return;
+            }
+        }
+
+        if q.starts_with("kew") || q.starts_with("k ") {
+            let kew_commands = vec![
+                ("play", "▶️ Resume playback", "kew play"),
+                ("pause", "⏸️ Pause playback", "kew pause"),
+                ("toggle", "⏯️ Toggle play/pause", "kew toggle"),
+                ("stop", "⏹️ Stop playback", "kew stop"),
+                ("next", "⏭️ Next track", "kew next"),
+                ("prev", "⏮️ Previous track", "kew prev"),
+                ("vol-up", "🔊 Increase volume", "kew volup"),
+                ("vol-down", "🔉 Decrease volume", "kew voldown"),
+                ("seek-forward", "⏩ Seek forward 5s", "kew seekf"),
+                ("seek-backward", "⏪ Seek backward 5s", "kew seekb"),
+                ("shuffle", "🔀 Toggle shuffle", "kew shuffle"),
+                ("repeat", "🔁 Toggle repeat", "kew repeat"),
+                ("add-dir", "➕ Add directory", "kew adddir"),
+                ("add-file", "🎵 Add file", "kew addfile"),
+                ("list", "📋 Show playlist", "kew list"),
+                ("clear", "🗑️ Clear playlist", "kew clear"),
+                ("save", "💾 Save playlist", "kew save"),
+                ("search", "🔍 Search in library", "kew search"),
+                ("show", "ℹ️ Show current track", "kew show"),
+                ("rebuild", "🔄 Rebuild library", "kew rebuildlibrary"),
+            ];
+
+            let kew_query = if q.starts_with("kew") {
+                if q.len() > 3 { q[3..].trim() } else { "" }
+            } else {
+                if q.len() > 2 { q[2..].trim() } else { "" }
+            };
+
+            for (command, description, kew_cmd) in kew_commands {
+                if kew_query.is_empty() || command.contains(kew_query) {
+                    self.results.push(Entry {
+                        title: format!("🎵 Kew {}", command),
+                        subtitle: description.to_string(),
+                        action: Action::SpotifyCommand(kew_cmd.to_string()),
+                    });
+                }
+            }
+
             if !self.results.is_empty() {
                 return;
             }
@@ -169,7 +214,7 @@ impl AppState {
             if !std::path::Path::new(file_path).exists() {
                 self.create_default_autocomplete_file(file_path);
             }
-            
+
             if let Err(e) = self.autocomplete.load_from_file(file_path) {
                 eprintln!("Failed to load autocomplete words from {}: {}", file_path, e);
             }
@@ -199,7 +244,7 @@ impl AppState {
             "branch", "tag", "release", "version", "semantic", "major", "minor", "patch",
             "changelog"
         ];
-        
+
         let content = default_words.join(", ");
         if let Err(e) = std::fs::write(file_path, content) {
             eprintln!("Failed to create default autocomplete file {}: {}", file_path, e);

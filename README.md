@@ -12,6 +12,9 @@ A minimal, fast cross‑platform (Linux + Windows) launcher written in Rust usin
 	* Windows: PowerShell scan of home + PATH plus `where.exe` fallback
 * Command runner (fallback when no app/file / prefix match)
 * Web search with configurable prefixes (`?`, `g `, `yt `, `w `, `gh `, etc.)
+* Music player controls:
+	* Spotify/Media controls via `playerctl` (prefix: `sp`)
+	* Kew music player controls (prefix: `kew` or `k `)
 * Theme switching: type `theme` to list & apply built‑in color schemes (persisted)
 * Minimal UI: centered (Linux) or screen‑centered (Windows), borderless, always-on-top
 * Icon caching and startup optimizations for snappy feel
@@ -33,6 +36,8 @@ Mandatory:
 Linux extras:
 * `fd` (fd-find) for file search (omit if you only use web/app/command)
 * `rsvg-convert` (optional) for better SVG icon rasterization
+* `playerctl` (optional) for Spotify/media player controls
+* `kew` (optional) for kew music player controls
 
 Windows extras:
 * PowerShell (built-in) used for broader file search
@@ -141,6 +146,29 @@ Notes
 - `prefix` is matched at the start of the query, the rest becomes the search term.
 - `%s` is replaced with the URL-encoded term.
 - First matching prefix wins; keep them distinct (e.g., `g ` vs `gh `).
+
+## Music Player Controls
+
+### Spotify and Media Players
+Type `sp` to access Spotify and media player controls via `playerctl`. See [SPOTIFY_CONTROLS.md](SPOTIFY_CONTROLS.md) for details.
+
+Features:
+- Play/pause/stop controls
+- Next/previous track
+- Volume controls
+- Shuffle and repeat modes
+- Works with Spotify, VLC, and other MPRIS-compatible players
+
+### Kew Music Player
+Type `kew` or `k ` to access kew music player controls. See [KEW_CONTROLS.md](KEW_CONTROLS.md) for details.
+
+Features:
+- Full playback controls (play, pause, next, prev, etc.)
+- Volume controls
+- Seek forward/backward
+- Playlist management
+- Library search
+- Shuffle and repeat modes
 
 ## Themes
 Type `theme` to list built-in themes, then select one. Theme persists via config (`current_theme`).
