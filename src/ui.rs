@@ -120,6 +120,7 @@ fn handle_keyboard_input(ui: &egui::Ui, ctx: &egui::Context, st: &mut AppState) 
     let up = ui.input(|i| i.key_pressed(egui::Key::ArrowUp));
     let down = ui.input(|i| i.key_pressed(egui::Key::ArrowDown));
     let tab = ui.input(|i| i.key_pressed(egui::Key::Tab));
+    let esc = ui.input(|i| i.key_pressed(egui::Key::Escape));
 
     // Toggle autocomplete mode with Tab key
     if tab {
@@ -160,6 +161,10 @@ fn handle_keyboard_input(ui: &egui::Ui, ctx: &egui::Context, st: &mut AppState) 
                 }
             }
         }
+    }
+
+    if esc {
+        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
     }
 }
 
