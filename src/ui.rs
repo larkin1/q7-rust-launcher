@@ -58,6 +58,12 @@ pub fn render_ui(ctx: &egui::Context, state: &Arc<Mutex<AppState>>) {
             }
         }
 
+        // set the typing mode back to true if the input box gains focus
+        if resp.as_ref().map(|r| r.gained_focus()).unwrap_or(false) {
+            st.typing = true;
+        }
+
+
         // Handle keyboard input
         handle_keyboard_input(ui, ctx, &mut st);
 
@@ -121,6 +127,8 @@ fn handle_keyboard_input(ui: &egui::Ui, ctx: &egui::Context, st: &mut AppState) 
     let down = ui.input(|i| i.key_pressed(egui::Key::ArrowDown));
     let tab = ui.input(|i| i.key_pressed(egui::Key::Tab));
     let esc = ui.input(|i| i.key_pressed(egui::Key::Escape));
+    let k_up = ui.input(|i| i.key_pressed(egui::Key::K));
+    let j_dn = ui.input(|i| i.key_pressed(egui::Key::J));
 
     // Toggle autocomplete mode with Tab key
     if tab {
@@ -138,6 +146,13 @@ fn handle_keyboard_input(ui: &egui::Ui, ctx: &egui::Context, st: &mut AppState) 
         st.selected -= 1;
     }
     if down && st.selected + 1 < st.results.len() {
+        st.selected += 1;
+    }
+
+    if k_up && st.selected > 0 && !st.typing {
+        st.selected -= 1;
+    }
+    if j_dn && st.selected + 1 < st.results.len() && !st.typing {
         st.selected += 1;
     }
 
@@ -163,8 +178,14 @@ fn handle_keyboard_input(ui: &egui::Ui, ctx: &egui::Context, st: &mut AppState) 
         }
     }
 
+    // when the user presses esc, they stop typing, and the j and k bindings allow them to move up
+    // and down. if they are in the moving mode already, quit the program.
     if esc {
-        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+        if st.typing {
+            st.typing = false;
+        } else {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+        }
     }
 }
 

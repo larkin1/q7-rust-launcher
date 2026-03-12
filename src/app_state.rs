@@ -18,6 +18,7 @@ pub struct AppState {
     pub theme: ThemePalette,
     pub autocomplete: AutocompleteEngine,
     pub autocomplete_mode: bool,
+    pub typing: bool,
 }
 
 impl Default for AppState {
@@ -37,6 +38,7 @@ impl Default for AppState {
             theme: ThemePalette::dracula(),
             autocomplete: AutocompleteEngine::new(),
             autocomplete_mode: false,
+            typing: true,
         }
     }
 }
